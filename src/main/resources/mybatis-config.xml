@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config" "http://mybatis.org/dtd/mybatis-3-config.dtd" >
+<configuration>
+
+	<settings>
+		<setting name="jdbcTypeForNull" value="NULL"/>
+	</settings>
+	
+	<typeAliases>
+		<typeAlias type="toy.shopping.pay.shop.model.vo.Product" alias="Product"/>
+		<typeAlias type="toy.shopping.pay.shop.model.vo.Image" alias="Image"/>
+	</typeAliases>
+	
+	<mappers>
+		<mapper resource="mappers/shopping-mapper.xml"/>
+	</mappers>
+</configuration>

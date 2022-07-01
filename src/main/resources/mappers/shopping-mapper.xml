@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="shoppingMapper">
+	<!-- resultMaps -->
+	<!-- 1. Product -->
+	<resultMap type="Product" id="productResultMap">
+		<id column="PRODUCT_NO" property="productNo"/>
+		
+		<result column="PRODUCT_NAME" property="productName"/>
+		<result column="PRODUCT_PRICE" property="productPrice"/>
+		<result column="PRODUCT_STOCK" property="productStock"/>
+		<result column="PRODUCT_ONELINE" property="productOneline"/>
+		<result column="PRODUCT_TYPE" property="productType"/>
+		<result column="PRODUCT_UPDATE_DATE" property="productUpdateDate"/>
+		<result column="PRODUCT_STATUS" property="productStatus"/>
+		<result column="PRODUCT_PURCHASES" property="productPurchases"/>
+	</resultMap>
+
+	<!-- 2. Image -->
+	<resultMap type="Image" id="imageResultMap">
+		<id column="IMAGE_NO" property="imageNo"/>
+		
+		<result column="CHANGE_NAME" property="changeName"/>
+		<result column="ORIGIN_NAME" property="originName"/>
+		<result column="FILE_PATH" property="filePath"/>
+		<result column="UPLOAD_DATE" property="uploadDate"/>
+		<result column="FILE_LEVEL" property="fileLevel"/> 
+		<result column="PRODUCT_NO" property="productNo"/>
+		<result column="IMAGE_STATUS" property="imageStatus"/>
+	</resultMap>
+	
+	<!-- sql -->
+	
+	
+	<!-- 총 게시물 수 구하기 -->
+	<select id="getListCount" resultType="_int">
+		select count(*)
+		from product
+	</select>
+	
+	<!-- 상품 리스트 가져오기 -->
+	<select id="selectPdtList" resultMap="productResultMap">
+		select *
+		from product
+		where product_status = 'Y'
+		order by product_no desc
+	</select>
+	
+	<!-- 상품 썸네일 리스트 가져오기 -->
+	<select id="selectThmbList" resultMap="imageResultMap">
+		select *
+		from image
+		where file_level = 0 and image_status='Y'
+	</select>
+	
+	<!-- 상품 등록 -->
+	<!-- 1. Product 등록 -->  <!-- 재고는 처음에 100개라고 일단 가정 -->
+	<insert id="insertProduct">
+		insert into product
+		values(seq_pid.nextval, #{productName}, #{productPrice}, 100 , #{productOneline}, 1, sysdate, default, default)
+	</insert>
+	
+	<!-- 2. 상품의 Image 파일 등록 -->
+	<insert id="insertPdtImages">
+		insert into image
+		values(seq_ino.nextval, #{changeName}, #{originName}, #{filePath}, sysdate, #{fileLevel}, seq_pid.currval, default)
+	</insert>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
