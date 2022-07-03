@@ -28,12 +28,24 @@
 		<result column="PRODUCT_NO" property="productNo"/>
 		<result column="IMAGE_STATUS" property="imageStatus"/>
 	</resultMap>
+
+	<!-- 3. Cart -->
+	<resultMap type="Cart" id="cartResultMap">
+		<id column="CART_NO" property="cartNo"/>
+		
+		<result column="PRODUCT_AMOUNT" property="productAmount"/>
+		<result column="EMAIL_ID" property="emailId"/>
+		<result column="PRODUCT_NO" property="productNo"/>
+		<result column="PRODUCT_NAME" property="productName"/>
+		<result column="PRODUCT_PRICE" property="productPrice"/>
+	</resultMap>
+
 	
 	<!-- sql -->
 	
 	
 	<!-- 총 게시물 수 구하기 -->
-	<select id="getListCount" resultType="_int">
+	<select id="getPdtListCount" resultType="_int">
 		select count(*)
 		from product
 	</select>
@@ -65,6 +77,26 @@
 		insert into image
 		values(seq_ino.nextval, #{changeName}, #{originName}, #{filePath}, sysdate, #{fileLevel}, seq_pid.currval, default)
 	</insert>
+	
+	<!-- 장바구니 등록 -->
+	<insert id="insertCart">
+		insert into Cart
+		values(seq_carid.nextval, #{productAmount}, #{emailId}, #{productNo}, #{productName}, #{productPrice})
+	</insert>
+	
+	<!-- 장바구니 목록 가져오기 -->
+	<select id="selectCartList" resultMap="cartResultMap">
+		select *
+		from cart
+		<!-- where email_id= -->
+		order by cart_no desc
+	</select>
+	
+	<!-- 장바구니 품목 삭제 -->
+	<delete id="deleteCart">
+		delete from cart
+		where cart_no = #{cartNo}
+	</delete>
 </mapper>
 
 

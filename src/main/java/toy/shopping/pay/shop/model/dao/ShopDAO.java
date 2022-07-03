@@ -6,6 +6,7 @@ import org.apache.ibatis.session.RowBounds;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.stereotype.Repository;
 
+import toy.shopping.pay.shop.model.vo.Cart;
 import toy.shopping.pay.shop.model.vo.Image;
 import toy.shopping.pay.shop.model.vo.PageInfo;
 import toy.shopping.pay.shop.model.vo.Product;
@@ -13,8 +14,8 @@ import toy.shopping.pay.shop.model.vo.Product;
 @Repository
 public class ShopDAO {
 	// 1. Product 카테고리
-	public int getListCount(SqlSessionTemplate sqlSession) {
-		return sqlSession.selectOne("shoppingMapper.getListCount");
+	public int getPdtListCount(SqlSessionTemplate sqlSession) {
+		return sqlSession.selectOne("shoppingMapper.getPdtListCount");
 	}
 	
 	public ArrayList<Product> selectPdtList(SqlSessionTemplate sqlSession, PageInfo pi) {
@@ -43,6 +44,19 @@ public class ShopDAO {
 		}
 		return imgResult;
 	}
+
+	public int insertCart(SqlSessionTemplate sqlSession, Cart cart) {
+		return sqlSession.insert("shoppingMapper.insertCart", cart);
+	}
+
+	public ArrayList<Cart> selectCartList(SqlSessionTemplate sqlSession) {
+		return (ArrayList)sqlSession.selectList("shoppingMapper.selectCartList");
+	}
+
+	public int deleteCart(SqlSessionTemplate sqlSession, int cartNo) {
+		return sqlSession.delete("shoppingMapper.deleteCart", cartNo);
+	}
+
 
 
 

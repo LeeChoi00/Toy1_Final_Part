@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import toy.shopping.pay.shop.model.dao.ShopDAO;
+import toy.shopping.pay.shop.model.vo.Cart;
 import toy.shopping.pay.shop.model.vo.Image;
 import toy.shopping.pay.shop.model.vo.PageInfo;
 import toy.shopping.pay.shop.model.vo.Product;
@@ -21,8 +22,8 @@ public class ShopServiceImpl implements ShopService{
 	private SqlSessionTemplate sqlSession;
 
 	@Override
-	public int getListCount() {
-		return spDAO.getListCount(sqlSession);
+	public int getPdtListCount() {
+		return spDAO.getPdtListCount(sqlSession);
 	}
 
 	@Override
@@ -46,6 +47,22 @@ public class ShopServiceImpl implements ShopService{
 		
 		return imgResult;
 	}
+
+	@Override
+	public int insertCart(Cart cart) {
+		return spDAO.insertCart(sqlSession, cart);
+	}
+
+	@Override
+	public ArrayList<Cart> selectCartList() {
+		return spDAO.selectCartList(sqlSession);
+	}
+
+	@Override
+	public int deleteCart(int cartNo) {
+		return spDAO.deleteCart(sqlSession, cartNo);
+	}
+
 
 
 }

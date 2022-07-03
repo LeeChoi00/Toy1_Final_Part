@@ -9,6 +9,7 @@
 	<typeAliases>
 		<typeAlias type="toy.shopping.pay.shop.model.vo.Product" alias="Product"/>
 		<typeAlias type="toy.shopping.pay.shop.model.vo.Image" alias="Image"/>
+		<typeAlias type="toy.shopping.pay.shop.model.vo.Cart" alias="Cart"/>
 	</typeAliases>
 	
 	<mappers>

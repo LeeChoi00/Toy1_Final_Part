@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import toy.shopping.pay.shop.model.service.ShopService;
+import toy.shopping.pay.shop.model.vo.Cart;
 import toy.shopping.pay.shop.model.vo.Image;
 import toy.shopping.pay.shop.model.vo.PageInfo;
 import toy.shopping.pay.shop.model.vo.Pagination;
@@ -33,7 +35,7 @@ public class ShopController {
 	public ModelAndView productList(@RequestParam(value="page", required=false) Integer page, ModelAndView mv) {
 		// 페이징
 		// 1. listCount(총 게시물 수 가져오기)
-		int listCount = spService.getListCount();
+		int listCount = spService.getPdtListCount();
 		
 		// 2. currentPage(이동하려는 대상 페이지) 가져오기
 		int currentPage=1;
@@ -153,7 +155,60 @@ public class ShopController {
 		return img;
 	}
 	
-
+	// 상품페이지에서 장바구니 상품 추가
+	@RequestMapping("addCart.sp")
+	public String insertShoppingCart(@ModelAttribute Cart cart) {
+		
+		// + 1. 이메일아이디 넣기 (나중에 없애기)
+		cart.setEmailId("aaa@aaa.com");
+		
+		// 2. 장바구니 등록
+		int result = spService.insertCart(cart);
+		
+		if(result>0) {
+			return "redirect:productList.sp";
+		} else {
+			throw new BoardException("장바구니 등록에 실패했습니다.");
+		}
+	}
+	
+	// 네비바에서 장바구니로 이동
+	@RequestMapping("cart.sp")
+	public ModelAndView cartList(ModelAndView mv) {
+		// 1. 나중에 페이징 처리하기
+		
+		// 2. 나중에 세션에서 이메일 아이디 가져오기
+		
+		// 3. 장바구니 리스트 가져오기
+		ArrayList<Cart> cartList = spService.selectCartList();
+		
+		// 4. 이미지 리스트 가져오기
+		ArrayList<Image> thmbList = spService.selectThmbList();
+		
+		// 5. 이동		
+		if(cartList!=null) {
+			mv.addObject("cartList", cartList);
+			mv.addObject("thmbList", thmbList);
+			mv.setViewName("shoppingCart");
+		} else {
+			throw new BoardException("장바구니 목록 불러오기에 실패했습니다.");
+		}
+		
+		return mv;
+	}
+	
+	// 장바구니 : 선택 상품 삭제  => ajax로 구현하기
+	@RequestMapping("deleteCart.sp")
+	public String deleteCart(@RequestParam("cartNo") Integer cartNo) {
+		
+		int result = spService.deleteCart(cartNo);
+		
+		if(result>0) {
+			return "redirect:cart.sp";
+		} else {
+			throw new BoardException("장바구니 삭제에 실패했습니다.");
+		}
+	}
 }
 
 

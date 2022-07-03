@@ -34,7 +34,7 @@
 				<c:forEach var="i" items="${list }">
 					
 					<div class="thumb-list" align="center">
-					<form>
+					<form action="addCart.sp" method="post">
  							<div>
 									<c:forEach var="a" items="${thmbList }">
 										<c:if test="${i.productNo== a.productNo }">
@@ -44,11 +44,14 @@
 							</div> 
 							<p>			
 								상품 명 : ${i.productName} }<br>
+								<input type="hidden" name="productName" value="${i.productName}">
 								가격 : ${i.productPrice }원<br>
+								<input type="hidden" name="productPrice" value="${i.productPrice}">
 								수량 선택 :<br>			
-								<input type="text" id="amount" name="amount" placeholder="희망 수량"><br>
-								<input type="submit" value="결제">
-								<input type="button" id="cart" value="장바구니">
+								<input type="number" id="productAmount" name="productAmount" min="1" max="10" name="age"><br>
+								<!-- <input type="text" id="amount" name="amount" placeholder="희망 수량" -->
+								<input type="submit" value="장바구니">
+								<input type="button" id="payment" value="결제">
 							<p>
 							<input type="hidden" name="productNo" value="${i.productNo}">
 					</form>		
@@ -67,10 +70,15 @@
 	
 	
 	<script>
-		$('#cart').click(function(){
-			location.href="cart.sp?amount="+document.getElementById('amount').value;
+		var productAmount = document.getElementById('productAmount').value
+		$('#payment').click(function(){   /* 여기서 url ? 뒤를 숨기는 방법은 없는가? */  /* 나중에 사용자 아이디도 넣기 */
+			location.href="payment.sp?productAmount="+productAmount +"&productNo="+${i.productNo}+
+					"&productPrice="+${i.productPrice}+"&productName="+${i.productName};
 		});
 	</script>
+
+
+<!-- 바로 결제, 장바구니를 ajax를 써볼까?  -->
 
 </body>
 </html>
