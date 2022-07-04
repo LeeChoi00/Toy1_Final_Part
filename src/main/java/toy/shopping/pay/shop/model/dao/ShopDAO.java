@@ -57,6 +57,10 @@ public class ShopDAO {
 		return sqlSession.delete("shoppingMapper.deleteCart", cartNo);
 	}
 
+	public Cart checkCart(SqlSessionTemplate sqlSession, int productNo) {
+		return sqlSession.selectOne("shoppingMapper.checkCart", productNo);
+	}
+
 
 
 

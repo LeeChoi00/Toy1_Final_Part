@@ -7,7 +7,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,6 +19,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
+
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonIOException;
 
 import toy.shopping.pay.shop.model.service.ShopService;
 import toy.shopping.pay.shop.model.vo.Cart;
@@ -166,11 +172,36 @@ public class ShopController {
 		int result = spService.insertCart(cart);
 		
 		if(result>0) {
-			return "redirect:productList.sp";
+			return "redirect:cart.sp";
 		} else {
 			throw new BoardException("장바구니 등록에 실패했습니다.");
 		}
 	}
+	
+	// 상품페이지에서 장바구니에 상품 추가 전 장바구니에 같은 상품 존재 여부 확인
+	@RequestMapping("checkCart.sp")
+	public void checkCart(@RequestParam("productNo") int productNo, HttpServletResponse response) {
+		System.out.println("productNo : " + productNo);
+		
+		Cart cart = spService.checkCart(productNo);
+		
+		System.out.println("cart : " + cart);
+		
+		boolean tf = false;
+		if(cart != null) {
+			tf=true;
+		}
+		System.out.println("tf: " + tf);
+		
+		try {
+			new GsonBuilder().setDateFormat("yyyy-MM-dd").create().toJson(tf, response.getWriter());
+		} catch (JsonIOException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	
 	// 네비바에서 장바구니로 이동
 	@RequestMapping("cart.sp")
@@ -209,6 +240,20 @@ public class ShopController {
 			throw new BoardException("장바구니 삭제에 실패했습니다.");
 		}
 	}
+	
+	// 장바구니 선택 품목 -> 결제페이지로 이동
+	@RequestMapping("pay.sp")
+	public ModelAndView paymentForm(@RequestParam("cartList") int[] cartList, ModelAndView mv) {
+		// 1. 이미지 리스트 받기
+		
+		// 2. 보내기
+		mv.addObject("cartList", cartList);
+		// 3. 이미지 리스트도 추가해야 함
+		mv.setViewName("buyPage");
+		return mv;
+	}
+	
+	
 }
 
 

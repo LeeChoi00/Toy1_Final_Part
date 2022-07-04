@@ -63,6 +63,11 @@ public class ShopServiceImpl implements ShopService{
 		return spDAO.deleteCart(sqlSession, cartNo);
 	}
 
+	@Override
+	public Cart checkCart(int productNo) {
+		return spDAO.checkCart(sqlSession, productNo);
+	}
+
 
 
 }

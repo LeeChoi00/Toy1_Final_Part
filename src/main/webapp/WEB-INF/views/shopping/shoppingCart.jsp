@@ -50,7 +50,6 @@
 		            </thead>
 		            <tbody>
 		            	<c:forEach var="i" items="${cartList }">
-		            	
 		                   		<tr>
 		                            <td>
 										<c:forEach var="a" items="${thmbList }">
@@ -73,13 +72,14 @@
 		                            <td id="checkbox">
 		                            	<input type="checkbox" name="items" class="item" value="${i.cartNo }">
 		                            </td> <!-- value에 상품번호 넣기 -->
-		                       		<form action="deleteCart.sp" method="post">
+		                       		<!-- <form action="deleteCart.sp" method="post"> -->
 		                       		<td>
 		                       			<input type="hidden" name="cartNo" value="${i.cartNo}">
-		                       			<input type="submit" value="삭제">
+		                       			<!-- <input type="button" id="deleteCart" value="삭제"> -->
+		                       			<button type="button" onclick="location.href='deleteCart.sp?cartNo='+${i.cartNo}">삭제</button>
 		                       			<%-- <button type="button" id="deleteCart" data-cartNo="${i.cartNo }">삭제</button> --%>
 		                       		</td>
-		                       		</form>
+		                       		<!-- </form> --> 
 		                        </tr>
 		                  </c:forEach>
 
@@ -87,14 +87,32 @@
 		        </table>
 		    </div>
 		
-=			<form action="pay.do" method="post">
+=			<!-- <form action="pay.do" method="post"> -->
 		    <div id="pay">
 		    <p uk-margin>
 		        <button class="uk-button uk-button-danger" id="but">선택 결제</button>
 		    </p>
 		    </div>
 		    
-		    </form>
+		    <!-- 선택 결제 -->
+		    <script>
+		    $('#but').on('click', function(){
+		    	var cartList = new Array();
+		    	/* var cartPdt = document.getElementsByName('items') */
+		    	
+		    	$("input[name=items]").each(function(index, item){
+		    		if($(item).prop("checked")){
+		    			cartList.push($(item).val());
+		    		}
+		    	});
+		    	/* alert(cartList); */	
+		    	
+		    	location.href = 'pay.sp?cartList='+cartList;
+		    });
+		    </script>
+		    
+		    
+		    <!-- </form> -->
 		=
 		    <ul class="uk-pagination uk-flex-center" uk-margin>
 		            <li><a href="#"><span uk-pagination-previous></span></a></li>
@@ -111,6 +129,7 @@
 			<form action="deleteCart.sp" method="post" class="deleteCartNo">
 				<input type="hidden" name="cartNo" class="cartNo">
 			</form>
+			
 		
 		    <!-- 전체 선택버튼 누르면 전체 선택 됨 -->
 		    <script>

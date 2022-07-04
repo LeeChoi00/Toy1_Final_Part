@@ -23,6 +23,8 @@ public interface ShopService {
 
 	int deleteCart(int cartNo);
 
+	Cart checkCart(int productNo);
+
 	
 
 
