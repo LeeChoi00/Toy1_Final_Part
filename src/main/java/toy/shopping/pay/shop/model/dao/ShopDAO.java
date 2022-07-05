@@ -61,6 +61,46 @@ public class ShopDAO {
 		return sqlSession.selectOne("shoppingMapper.checkCart", productNo);
 	}
 
+	
+	// 장바구니 리스트 받아오기
+//	// 방법 2	
+//	public ArrayList<Cart> cartsForPay(SqlSessionTemplate sqlSession, ArrayList<Cart> cartNos) {
+//		ArrayList<Cart> carts = new ArrayList<Cart>();
+//		for(int i = 0; i<cartNos.size();i++) {
+//			Cart cart = null;
+//			cart = sqlSession.selectOne("shoppingMapper.cartsForPay", cartNos.get(i));
+//			carts.add(cart);
+//		}
+//		return carts;
+//	}
+	
+	// 방법 3
+	public ArrayList<Cart> cartsForPay(SqlSessionTemplate sqlSession, int[] cartList) {
+		ArrayList<Cart> carts = new ArrayList<Cart>();
+		
+		for(int i = 0; i<cartList.length;i++) {
+			int cartNo = cartList[i];
+			Cart cart = sqlSession.selectOne("shoppingMapper.cartsForPay", cartNo);
+			carts.add(cart);
+		}
+		return carts;
+	}	
+	
+	public ArrayList<Image> imgForCartPay(SqlSessionTemplate sqlSession, ArrayList<Cart> carts) {
+		ArrayList<Image> images = new ArrayList<Image>();
+		for(int i = 0; i<carts.size();i++) {
+			Image img = sqlSession.selectOne("shoppingMapper.imgForCartPay", carts.get(i));
+			images.add(img);
+		}
+		
+		return images;
+	}
+
+
+
+
+
+
 
 
 

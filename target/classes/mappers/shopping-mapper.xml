@@ -105,6 +105,24 @@
 		delete from cart
 		where cart_no = #{cartNo}
 	</delete>
+	
+	<!-- 장바구니에서 결제 페이지로 이동 -->
+	<!-- 1. 선택 장바구니 정보 가져오기 -->
+	<select id="cartsForPay" resultMap="cartResultMap">
+		select * 
+		from cart
+		where cart_no = #{cartNo}
+	</select>
+	
+	<!-- 방법 3 => 1. 선택 장바구니 정보 가져오기 -->
+	
+	<!-- 2. 선택 장바구니 이미지 가져오기 -->
+	<select id="imgForCartPay" resultMap="imageResultMap">
+		select *
+		from image
+		where product_no = #{productNo} and file_level = 0
+	</select>
+
 </mapper>
 
 

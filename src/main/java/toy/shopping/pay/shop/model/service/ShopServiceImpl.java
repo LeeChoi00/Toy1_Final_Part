@@ -68,6 +68,28 @@ public class ShopServiceImpl implements ShopService{
 		return spDAO.checkCart(sqlSession, productNo);
 	}
 
+	// 장바구니 리스트 받아오기
+//	// 방법 2
+//	@Override
+//	public ArrayList<Cart> cartsForPay(ArrayList<Cart> cartNos) {
+//		return spDAO.cartsForPay(sqlSession, cartNos);
+//	}
+
+	@Override
+	public ArrayList<Cart> cartsForPay(int[] cartList) {
+		return spDAO.cartsForPay(sqlSession, cartList);
+	}	
+	
+	@Override
+	public ArrayList<Image> imgForCartPay(ArrayList<Cart> carts) {
+		return spDAO.imgForCartPay(sqlSession, carts);
+	}
+
+
+
+
+
+
 
 
 }

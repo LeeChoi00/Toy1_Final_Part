@@ -243,12 +243,60 @@ public class ShopController {
 	
 	// 장바구니 선택 품목 -> 결제페이지로 이동
 	@RequestMapping("pay.sp")
-	public ModelAndView paymentForm(@RequestParam("cartList") int[] cartList, ModelAndView mv) {
-		// 1. 이미지 리스트 받기
+	public ModelAndView paymentForm(@RequestParam("cartList") int[] cartList, 
+			@RequestParam("cartAmountArr") int[] cartAmountArr, ModelAndView mv) {
+		/* 방법 1
+		 * // 1. 품목의 cart 정보 받아오기 ArrayList<Cart> crtList = spService.selectCartList();
+		 * 
+		 * // 2. cartList의 장바구니 번호에 해당하는 객체만 리스트에 담기 ArrayList<Cart> carts = new
+		 * ArrayList<Cart>(); for(int i = 0; i<crtList.size();i++) { for(int j=0;
+		 * j<cartList.length;j++) { if(crtList.get(i).getCartNo() == cartList[i]) {
+		 * carts.add(crtList.get(i)); } } }
+		 */
 		
-		// 2. 보내기
-		mv.addObject("cartList", cartList);
-		// 3. 이미지 리스트도 추가해야 함
+//		// 방법 2
+//		// 2. 장바구니 정보 받아와서 완성하기
+//		// 2.1 선택 품목의 cartNo을 cart객체에 담아 리스트에 넣기 => 복잡함
+//		ArrayList<Cart> cartNos = new ArrayList<Cart>();
+//		for(int i = 0; i<cartList.length;i++) {
+//			Cart cart = new Cart();
+//			cart.setCartNo(cartList[i]);
+//			cart.setProductAmount(cartAmountArr[i]);
+//			cartNos.add(cart);
+//		}
+//
+//		// 2.2 db에서 선택 장바구니 정보 받아오기
+//		ArrayList<Cart> carts = spService.cartsForPay(cartNos);
+		
+//		// 2.3 장바구니 변경 수량 넣기
+//		for(int i = 0; i<carts.size();i++) {
+//				for(int j = 0; j<cartNos.size(); j++) {
+//					if(carts.get(i).getCartNo() == cartNos.get(j).getCartNo()) {
+//						carts.get(i).setProductAmount(cartNos.get(i).getProductAmount());	
+//					}
+//				}
+//		}
+		
+		// 방법 3 배열 그대로 보내서 장바구니 정보 받아오기
+		// 2. 장바구니 정보 받아와서 완성하기
+		// 2.1 db에서 cartNo에 따른 cart 객체 리스트 받아오기
+		ArrayList<Cart> carts = spService.cartsForPay(cartList);
+		
+//		System.out.println("carts.size : " + carts.size());
+//		System.out.println("cartAmountArr : " + cartAmountArr);
+		
+		// 2.2 장바구니 정보에 수량 설정하기
+		for(int i = 0; i<carts.size();i++) {
+			carts.get(i).setProductAmount(cartAmountArr[i]);
+		}
+
+	
+		// 3. 이미지 리스트 받기
+		ArrayList<Image> images = spService.imgForCartPay(carts);
+		
+		// 4. 보내기
+		mv.addObject("carts", carts);
+		mv.addObject("images", images);
 		mv.setViewName("buyPage");
 		return mv;
 	}

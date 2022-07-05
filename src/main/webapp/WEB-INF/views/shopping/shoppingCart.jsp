@@ -49,7 +49,7 @@
 		                </tr>
 		            </thead>
 		            <tbody>
-		            	<c:forEach var="i" items="${cartList }">
+		            	<c:forEach var="i" items="${cartList }"  varStatus='vs'>
 		                   		<tr>
 		                            <td>
 										<c:forEach var="a" items="${thmbList }">
@@ -58,13 +58,13 @@
 											</c:if>
 										</c:forEach>
 									</td>
-		                            <td>
+		                            <td id="second">
 		                                <p>
 		                                    <div><a location.href=''>${i.productName }</a></div>
 		                                    <div>총 가격 : ${i.productPrice }</div>                   
 		                                    <div>안내사항</div>
-		                                    <div>갯수 :
-		                                    	<input type="number" id="amount" name="productAmount" min="1" max="10" name="age" value="${i.productAmount }"><br>
+		                                    <div id="amount">갯수 :
+		                                    	<input type="number" id="productAmount" name="productAmount" min="1" max="10" name="age" value="${i.productAmount }"><br>
 		                                    	<!-- <input type="text" name="noProduct"> -->
 		                                    </div>
 		                                </p>
@@ -74,7 +74,7 @@
 		                            </td> <!-- value에 상품번호 넣기 -->
 		                       		<!-- <form action="deleteCart.sp" method="post"> -->
 		                       		<td>
-		                       			<input type="hidden" name="cartNo" value="${i.cartNo}">
+		                       			<input type="hidden" id="cartNo" name="cartNo" value="${i.cartNo}">
 		                       			<!-- <input type="button" id="deleteCart" value="삭제"> -->
 		                       			<button type="button" onclick="location.href='deleteCart.sp?cartNo='+${i.cartNo}">삭제</button>
 		                       			<%-- <button type="button" id="deleteCart" data-cartNo="${i.cartNo }">삭제</button> --%>
@@ -94,20 +94,24 @@
 		    </p>
 		    </div>
 		    
-		    <!-- 선택 결제 -->
+		    <!-- 선택된 상품 정보만 결제 페이지로 이동 -->
 		    <script>
 		    $('#but').on('click', function(){
 		    	var cartList = new Array();
+		    	var cartAmountArr = new Array();
 		    	/* var cartPdt = document.getElementsByName('items') */
 		    	
 		    	$("input[name=items]").each(function(index, item){
 		    		if($(item).prop("checked")){
 		    			cartList.push($(item).val());
+		    			/* console.log($(item).parent().siblings('#second').find('#productAmount').val()); */
+		    			cartAmountArr.push($(item).parent().siblings('#second').find('#productAmount').val());
 		    		}
 		    	});
 		    	/* alert(cartList); */	
+
 		    	
-		    	location.href = 'pay.sp?cartList='+cartList;
+		    	location.href = 'pay.sp?cartList='+cartList+"&cartAmountArr="+cartAmountArr; 
 		    });
 		    </script>
 		    
