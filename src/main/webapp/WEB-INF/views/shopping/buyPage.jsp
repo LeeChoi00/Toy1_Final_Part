@@ -76,10 +76,9 @@
             
           </ul><input type="hidden" id="isPickupType" value="false"></div>        
   
+    
+        
 
-        </div>
-        <div class="bg_loading" id="bgLoading" style="display: none;">
-        <div class="loading_show"></div>
         </div>
         
      
