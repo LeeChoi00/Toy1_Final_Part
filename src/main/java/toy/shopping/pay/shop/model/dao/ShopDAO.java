@@ -8,6 +8,9 @@ import org.springframework.stereotype.Repository;
 
 import toy.shopping.pay.shop.model.vo.Cart;
 import toy.shopping.pay.shop.model.vo.Image;
+import toy.shopping.pay.shop.model.vo.Order;
+import toy.shopping.pay.shop.model.vo.OrderDetail;
+import toy.shopping.pay.shop.model.vo.OrderStatus;
 import toy.shopping.pay.shop.model.vo.PageInfo;
 import toy.shopping.pay.shop.model.vo.Product;
 
@@ -57,8 +60,8 @@ public class ShopDAO {
 		return sqlSession.delete("shoppingMapper.deleteCart", cartNo);
 	}
 
-	public Cart checkCart(SqlSessionTemplate sqlSession, int productNo) {
-		return sqlSession.selectOne("shoppingMapper.checkCart", productNo);
+	public Cart checkCart(SqlSessionTemplate sqlSession, Cart crt) {
+		return sqlSession.selectOne("shoppingMapper.checkCart", crt);
 	}
 
 	
@@ -85,6 +88,14 @@ public class ShopDAO {
 		}
 		return carts;
 	}	
+
+	public int ctAmountUpdate(SqlSessionTemplate sqlSession, ArrayList<Cart> carts) {
+		int result = 0;
+		for(int i = 0; i<carts.size();i++) {
+			result = result + sqlSession.update("shoppingMapper.ctAmountUpdate", carts.get(i));
+		}
+		return result;
+	}	
 	
 	public ArrayList<Image> imgForCartPay(SqlSessionTemplate sqlSession, ArrayList<Cart> carts) {
 		ArrayList<Image> images = new ArrayList<Image>();
@@ -95,6 +106,65 @@ public class ShopDAO {
 		
 		return images;
 	}
+	
+	// 주문 정보 저장
+	// 1. 주문 장바구니 품목 가져오기
+	public ArrayList<Cart> paidCartList(SqlSessionTemplate sqlSession, int[] cartNos) {
+		ArrayList<Cart> carts = new ArrayList<Cart>();
+		for(int i = 0; i<cartNos.length;i++) {
+			Cart cart = new Cart();
+			int cartNo = cartNos[i];
+			cart = sqlSession.selectOne("shoppingMapper.paidCartList", cartNo);
+			carts.add(cart);
+		}
+		return carts;
+	}
+	
+	// 2. 주문 정보 넘기기
+	public int insertOrder(SqlSessionTemplate sqlSession, ArrayList<OrderDetail> odList) {
+		int oRslt = 0;
+		int osRslt = 0;
+		int odRslt = 0;
+		System.out.println(odList);
+		if(!odList.isEmpty()) {
+			oRslt = sqlSession.insert("shoppingMapper.insertOrder", odList.get(0));
+			osRslt = sqlSession.insert("shoppingMapper.insertOrderStatus");
+		}
+		for(int i = 0; i<odList.size();i++) {
+			odRslt = odRslt + sqlSession.insert("shoppingMapper.insertOrderDetail", odList.get(i));
+		}
+		
+		int result = oRslt + osRslt + odRslt;
+		// 정상 실행의 경우
+		// oRslt(1) + osRlt(1) + odRslt(odList.size()) 만큼의 값이 나와야 함
+		
+		return result;
+	}
+	
+	// 주문 내역
+	// 1. 주문 리스트 받기
+	public ArrayList<OrderDetail> myOrderList(SqlSessionTemplate sqlSession, String emailId) {
+		return (ArrayList)sqlSession.selectList("shoppingMapper.myOrderList", emailId);
+	}
+
+	public ArrayList<OrderStatus> myOrderStatusList(SqlSessionTemplate sqlSession, ArrayList<OrderDetail> orderList) {
+		ArrayList<OrderStatus> orderStatusList = new ArrayList<OrderStatus>();
+		for(int i=0; i<orderList.size();i++) {
+			OrderStatus os = sqlSession.selectOne("shoppingMapper.myOrderStatusList", orderList.get(i));
+			orderStatusList.add(os);
+		}
+		return orderStatusList;
+	}
+
+
+
+
+
+
+
+
+
+
 
 
 

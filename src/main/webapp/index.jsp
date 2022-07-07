@@ -15,7 +15,7 @@
 </head>
 <body>
 <div>
-	<button onclick="location.href='enter.do'">입장!</button>
+	<button onclick="location.href='home.do'">입장!</button>
 </div>
 </body>
 </html>

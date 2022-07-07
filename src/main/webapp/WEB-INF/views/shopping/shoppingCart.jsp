@@ -25,9 +25,11 @@
         #pay{padding-left: 900px;}
         #all{content-align:right; }
         #checkAll{ background-color: rgb(255, 92, 88);}
+        button{background-color:rgb(255, 92, 88);}
     </style>
 </head>
 <body>
+	<c:import url="../common/menubar.jsp"/>
 	<%-- <c:import url="../common/menubar.jsp"/>  --%>
     <div>
         <h2>장바구니</h2>

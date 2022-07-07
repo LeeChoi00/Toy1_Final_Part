@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -23,9 +24,13 @@ import org.springframework.web.servlet.ModelAndView;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 
+import toy.shopping.pay.member.model.vo.Member;
 import toy.shopping.pay.shop.model.service.ShopService;
 import toy.shopping.pay.shop.model.vo.Cart;
 import toy.shopping.pay.shop.model.vo.Image;
+import toy.shopping.pay.shop.model.vo.Order;
+import toy.shopping.pay.shop.model.vo.OrderDetail;
+import toy.shopping.pay.shop.model.vo.OrderStatus;
 import toy.shopping.pay.shop.model.vo.PageInfo;
 import toy.shopping.pay.shop.model.vo.Pagination;
 import toy.shopping.pay.shop.model.vo.Product;
@@ -180,13 +185,23 @@ public class ShopController {
 	
 	// 상품페이지에서 장바구니에 상품 추가 전 장바구니에 같은 상품 존재 여부 확인
 	@RequestMapping("checkCart.sp")
-	public void checkCart(@RequestParam("productNo") int productNo, HttpServletResponse response) {
-		System.out.println("productNo : " + productNo);
+	public void checkCart(@RequestParam("productNo") int productNo, HttpServletResponse response, HttpSession session) {
+//		System.out.println("productNo : " + productNo);
 		
-		Cart cart = spService.checkCart(productNo);
+		// 1. session에서 loginUser의 emailId 받아오기
+		String emailId = ((Member)session.getAttribute("loginUser")).getEmailId();
+		
+		// 2. cart 객체에 emailId와 productNo 넣어주기
+		Cart crt = new Cart();
+		crt.setEmailId(emailId);
+		crt.setProductNo(productNo);
+		
+		Cart cart = spService.checkCart(crt);
 		
 		System.out.println("cart : " + cart);
 		
+		
+		// 중복 품목 존재 여부
 		boolean tf = false;
 		if(cart != null) {
 			tf=true;
@@ -285,21 +300,142 @@ public class ShopController {
 //		System.out.println("carts.size : " + carts.size());
 //		System.out.println("cartAmountArr : " + cartAmountArr);
 		
-		// 2.2 장바구니 정보에 수량 설정하기
+		// 2.2 장바구니 db 수량 변경하기
 		for(int i = 0; i<carts.size();i++) {
 			carts.get(i).setProductAmount(cartAmountArr[i]);
 		}
-
-	
-		// 3. 이미지 리스트 받기
-		ArrayList<Image> images = spService.imgForCartPay(carts);
+		int ctAmountUpdate = spService.ctAmountUpdate(carts);
 		
-		// 4. 보내기
-		mv.addObject("carts", carts);
-		mv.addObject("images", images);
-		mv.setViewName("buyPage");
-		return mv;
+		if(ctAmountUpdate < carts.size()) {
+			throw new BoardException("장바구니 수량 변경에 실패했습니다.");
+		} else {
+			// 3. 이미지 리스트 받기
+			ArrayList<Image> images = spService.imgForCartPay(carts);
+			
+			// 4. 보내기
+			mv.addObject("carts", carts);
+			mv.addObject("images", images);
+			mv.setViewName("buyPage");
+			return mv;
+		}
 	}
+	
+	// 주문 내역 저장
+	@RequestMapping("insertOrder.sp")
+	public String insertOrder(@RequestParam("cartNos") int[] cartNos, 
+			@ModelAttribute Order order, @RequestParam("post") String post,
+			@RequestParam("adr1") String adr1, @RequestParam("adr2") String adr2,
+			HttpSession session) {
+		// carts -> 각 결제 품목 정보
+		// order -> totalPrice, orderRequest, emailId, recipientName, recipientAdr, recipientPhone;
+		
+		// 1. Cart(결제 장바구니 품목) 가져오기
+		ArrayList<Cart> carts = spService.paidCartList(cartNos);
+		
+		// 2. Order 정보 
+		// 2.1 세션에서 emailId 가져오기 + Order 객체에 넣기
+		Member loginUser = (Member)session.getAttribute("loginUser");
+		String emailId = loginUser.getEmailId();
+
+		
+		// 2.2 post + adr1 + adr2 => recipeintAdr 만들기
+		String recipientAdr = post+", " + adr1 + " " + adr2;
+		order.setRecipientAdr(recipientAdr);
+		
+		// 2.3 order의 recipientName, recipientAdr, recipientPhone 중 하나 이상 비면 
+			// 세션의 loginUser 정보로 채우기
+		String a = "  ";
+		System.out.println("a : " + a.isEmpty());
+		if(post.isEmpty()) {
+			order.setRecipientAdr(loginUser.getAddress());
+		} else {
+			order.setRecipientAdr(recipientAdr);
+		}
+		
+		System.out.println("carts : " + carts);
+		System.out.println("order : " + order);
+		
+		// 3. OrderDetail(개별 품목 정보)
+		// 3.1 carts, Order에서 정보 빼내 OrderDetail 객체에 개별 품목 넣어주고 리스트에 추가하기
+		ArrayList<OrderDetail> odList = new ArrayList<OrderDetail>();
+		for(int i = 0; i<carts.size();i++) {
+			OrderDetail od = new OrderDetail();
+			od.setTotalPrice(order.getTotalPrice());
+			od.setOrderRequest(order.getOrderRequest());
+			od.setEmailId(emailId);
+			od.setRecipientName(order.getRecipientName());
+			od.setRecipientAdr(order.getRecipientAdr());
+			od.setRecipientPhone(order.getRecipientPhone());
+			od.setOrderAmount(carts.get(i).getProductAmount());
+			od.setProductNo(carts.get(i).getProductNo());
+			
+			odList.add(od);
+		}
+		
+		System.out.println("odList : " + odList);
+		
+		// 4. DB 저장 및 이동
+		// 4.1 OrderDetail 리스트 보내기
+		int result = spService.insertOrder(odList);
+		System.out.println("result : " + result);
+		
+		// 4.2 이동
+		if (result < odList.size()+2) {
+			throw new BoardException("주문 정보 저장에 실패했습니다.");			
+		} else {
+			int dltCarts = 0;
+			for(int i =0; i<carts.size();i++) {
+				int deleteCart = spService.deleteCart(carts.get(i).getCartNo());
+				dltCarts +=deleteCart;
+			}
+			if(dltCarts < carts.size()) {
+				throw new BoardException("주문 장바구니 삭제에 실패했습니다.");
+			} else {
+				return "redirect:orderList.sp";
+			}		
+		}
+	}
+	
+	// 주문 내역으로 이동하기
+	@RequestMapping("orderList.sp")
+	public String orderList(HttpSession session, ModelAndView mv) {
+		// 1. 주문자 이메일 가져오기
+		String emailId = ((Member)session.getAttribute("loginUser")).getEmailId();
+		
+		// 2. Order에서 주문자의 주문 정보가져오기
+		ArrayList<OrderDetail> orderList = spService.myOrderList(emailId);
+		/// %%%%%%%%%%%%%%% 7/8 여기부터 : Order 클래스 만들고, 위에 타입 ArrayList<Order>로 바꾸기
+		
+		
+		// 2.1 주문 정보로 주문 상태 정보 가져오기
+		ArrayList<OrderStatus> orderStatus = spService.myOrderStatusList(orderList);
+		
+		// 2.2 이미지 리스트 가져오기
+		
+		
+		// 3. 페이징	
+		// 3.1 주문 정보 리스트 숫자 구하기
+		
+		// 3.2 현재 페이지 구하기
+		
+		// 3.3 페이징 계산
+		
+
+		// 4. mv에 담아 이동
+		
+	}
+	
+	// 주문 관리로 이동하기
+	@RequestMapping("orderAdminList.sp")
+	public String orderAdminList() {
+		// 1. 전체 주문(ORDER) 정보 가져오기
+		
+		// 2. 페이징
+		
+		// 3. mv에 담아 이동
+	}
+	
+	
 	
 	
 }

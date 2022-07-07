@@ -40,7 +40,32 @@
 		<result column="PRODUCT_PRICE" property="productPrice"/>
 	</resultMap>
 
+	<!-- 4. OrderDetail -->
+	<resultMap type="OrderDetail" id="orderDetailResultMap">
+		<id column="ORDER_NO" property="orderNo"/>	
+			
+		<result column="ORDER_DATE" property="orderDate"/>		
+		<result column="TOTAL_PRICE" property="totalPrice"/>
+		<result column="ORDER_REQUEST" property="orderRequest"/>
+		<result column="EMAIL_ID" property="emailId"/>
+		<result column="ORDER_STATUS_NO" property="orderStatusName"/>
+		<result column="RECIPIENT_NAME" property="recipientName"/>
+		<result column="RECIPIENT_ADR" property="recipientAdr"/>
+		<result column="RECIPIENT_PHONE" property="recipientPhone"/>
+		<result column="ORDER_DETAIL_NO" property="orderDetailNo"/>
+		<result column="ORDER_AMOUNT" property="orderAmount"/>
+		<result column="PRODUCT_NO" property="productNo"/>
+	</resultMap>
 	
+	<!-- 4. OrderDetail -->
+	<resultMap type="OrderStatus" id="orderStatusResultMap">
+		<id column="ORDER_STATUS_NO" property="orderStatusNo"/>
+		
+		<result column="ORDER_STATUS_NAME" property="orderStatusName"/>
+		<result column="ORDER_NO" property="orderNo"/>
+	</resultMap>	
+	
+		
 	<!-- sql -->
 	
 	
@@ -89,7 +114,7 @@
 	<select id="checkCart" resultMap="cartResultMap">
 		select *
 		from cart
-		where product_no = #{productNo}
+		where product_no = #{productNo} and email_id = #{emailId}
 	</select>
 	
 	<!-- 장바구니 목록 가져오기 -->
@@ -115,12 +140,58 @@
 	</select>
 	
 	<!-- 방법 3 => 1. 선택 장바구니 정보 가져오기 -->
+	<!-- 1. 품목 변경 수량(productAmount)으로 db의  CART 변경하기 -->
+	<update id="ctAmountUpdate">
+		update cart
+		set product_amount = #{productAmount}
+		where cart_no=#{cartNo}
+	</update>
 	
 	<!-- 2. 선택 장바구니 이미지 가져오기 -->
 	<select id="imgForCartPay" resultMap="imageResultMap">
 		select *
 		from image
 		where product_no = #{productNo} and file_level = 0
+	</select>
+	
+	<!-- 주문 정보 저장 -->
+	<!-- 1. 주문 장바구니 내역 가져오기 -->
+	<select id="paidCartList" resultMap="cartResultMap">
+		select *
+		from cart
+		where cart_no = #{cartNo}
+	</select>
+	
+	<!-- 2. 주문 정보 넘기기 -->
+	<insert id="insertOrder">
+		insert into "ORDER"
+		values(seq_oid.nextval, sysdate, #{totalPrice}, #{orderRequest}, #{emailId}, seq_osid.nextval, #{recipientName}, #{recipientAdr}, #{recipientPhone})
+	</insert>
+	
+	<insert id="insertOrderStatus">
+		insert into order_status
+		values(seq_osid.currval, '주문', seq_oid.currval)
+	</insert>
+	
+	<insert id="insertOrderDetail">
+		insert into order_detail
+		values(seq_odid.nextval, #{orderAmount}, #{productNo}, seq_oid.currval)
+	</insert>
+	
+	<!-- 주문 내역 -->
+	<!-- 1. 주문 내역 받아오기 -->
+	<select id="myOrderList" resultMap="orderDetailResultMap">
+		select *
+		from "ORDER"
+			left join order_detail using(order_no)
+		where email_id=#{emailId}
+	</select>
+	
+	<!-- 1. 주문 상태 내역 받아오기 -->
+	<select id="myOrderStatusList" resultMap="orderStatusResultMap">
+		select *
+		from order_status
+		where order_no=#{orderNo}
 	</select>
 
 </mapper>

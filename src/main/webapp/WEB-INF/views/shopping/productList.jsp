@@ -52,7 +52,7 @@
 								가격 : ${i.productPrice }원<br>
 								<input type="hidden" id="productPrice" name="productPrice" value="${i.productPrice}">
 								수량 선택 :<br>			
-								<input type="number" id="productAmount" name="productAmount" min="1" max="10" name="age"><br>
+								<input type="number" id="productAmount" name="productAmount" min="1" max="10"><br>
 								<!-- <input type="text" id="amount" name="amount" placeholder="희망 수량" -->
 								<input type='button' value='장바구니' class="cart">
 								<button type="button" id="payment">결제</button>

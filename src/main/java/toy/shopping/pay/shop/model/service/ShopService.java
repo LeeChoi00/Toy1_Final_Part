@@ -4,6 +4,9 @@ import java.util.ArrayList;
 
 import toy.shopping.pay.shop.model.vo.Cart;
 import toy.shopping.pay.shop.model.vo.Image;
+import toy.shopping.pay.shop.model.vo.Order;
+import toy.shopping.pay.shop.model.vo.OrderDetail;
+import toy.shopping.pay.shop.model.vo.OrderStatus;
 import toy.shopping.pay.shop.model.vo.PageInfo;
 import toy.shopping.pay.shop.model.vo.Product;
 
@@ -23,7 +26,7 @@ public interface ShopService {
 
 	int deleteCart(int cartNo);
 
-	Cart checkCart(int productNo);
+	Cart checkCart(Cart crt);
 	
 	// 장바구니 리스트 받아오기
 //	// 방법 2
@@ -31,8 +34,28 @@ public interface ShopService {
 	
 	// 방법 3 배열 그대로 보내서 받아오기
 	ArrayList<Cart> cartsForPay(int[] cartList);
-
+	
+	int ctAmountUpdate(ArrayList<Cart> carts);
+	
 	ArrayList<Image> imgForCartPay(ArrayList<Cart> carts);
+	
+	// 주문 정보 넘기기
+	ArrayList<Cart> paidCartList(int[] cartNos);
+	
+	int insertOrder(ArrayList<OrderDetail> odList);
+	
+	// 주문 내역
+	ArrayList<OrderDetail> myOrderList(String emailId);
+
+	ArrayList<OrderStatus> myOrderStatusList(ArrayList<OrderDetail> orderList);
+
+	
+
+
+	
+	
+
+
 
 	
 
