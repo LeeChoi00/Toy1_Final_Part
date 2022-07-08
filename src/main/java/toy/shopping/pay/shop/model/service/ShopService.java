@@ -45,9 +45,34 @@ public interface ShopService {
 	int insertOrder(ArrayList<OrderDetail> odList);
 	
 	// 주문 내역
-	ArrayList<OrderDetail> myOrderList(String emailId);
+	// 1. 페이징
+	int getMyOrderListCount(String emailId);
+	
+	// 2. 주문 정보 받기
+	ArrayList<OrderStatus> getMyOrderList(String emailId, PageInfo pi);
+	
+	// 주문 내역 - 상세보기
+	ArrayList<OrderDetail> getMyOrderDetailList(int orderNo);
 
-	ArrayList<OrderStatus> myOrderStatusList(ArrayList<OrderDetail> orderList);
+	ArrayList<Image> getMyOrderImgList(ArrayList<OrderDetail> orderDetailList);
+	
+	// 주문 관리
+	int getOrderListCount();
+
+	ArrayList<OrderStatus> getAdminOrderList(PageInfo pi);
+	
+	// 주문 관리 - 주문 상태 변경
+	int changeOrderStatus(OrderStatus os);
+	
+	// 주문 관리 - 주문 목록
+	int getOrderedListCount();
+	
+	ArrayList<OrderDetail> getOrderedList(PageInfo pi);
+	
+
+
+
+
 
 	
 

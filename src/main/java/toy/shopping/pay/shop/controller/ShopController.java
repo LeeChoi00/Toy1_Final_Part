@@ -24,6 +24,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 
+import toy.shopping.pay.member.model.vo.Admin;
 import toy.shopping.pay.member.model.vo.Member;
 import toy.shopping.pay.shop.model.service.ShopService;
 import toy.shopping.pay.shop.model.vo.Cart;
@@ -54,8 +55,11 @@ public class ShopController {
 			currentPage = page;
 		}
 		
+		// 한 페이지에 들어갈 게시물 수
+		int boardLimit = 12;
+		
 		// 3. 페이징 계산
-		PageInfo pi = new Pagination().getPageInfo(currentPage, listCount);
+		PageInfo pi = new Pagination().getPageInfo(currentPage, listCount, boardLimit);
 		
 		// 정보 가져오기
 		// 4. 게시물 리스트 가져오기
@@ -398,42 +402,159 @@ public class ShopController {
 	
 	// 주문 내역으로 이동하기
 	@RequestMapping("orderList.sp")
-	public String orderList(HttpSession session, ModelAndView mv) {
+	public ModelAndView orderList(@RequestParam(value="page", required=false) Integer page,
+			HttpSession session, ModelAndView mv) {	
 		// 1. 주문자 이메일 가져오기
 		String emailId = ((Member)session.getAttribute("loginUser")).getEmailId();
+
+		// 2. 페이징	
+		// 2.1 주문 정보 리스트 숫자 구하기
+		int listCount = spService.getMyOrderListCount(emailId);
 		
-		// 2. Order에서 주문자의 주문 정보가져오기
-		ArrayList<OrderDetail> orderList = spService.myOrderList(emailId);
-		/// %%%%%%%%%%%%%%% 7/8 여기부터 : Order 클래스 만들고, 위에 타입 ArrayList<Order>로 바꾸기
+		// 2.2 현재 페이지 구하기
+		int currentPage=1;
+		if(page != null) {
+			currentPage = page;
+		}
 		
+		// 2.3 한 페이지에 들어갈 게시물 수
+		int boardLimit = 10;
 		
-		// 2.1 주문 정보로 주문 상태 정보 가져오기
-		ArrayList<OrderStatus> orderStatus = spService.myOrderStatusList(orderList);
+		// 2.4 페이징 계산		
+		PageInfo pi = new Pagination().getPageInfo(currentPage, listCount, boardLimit);
 		
-		// 2.2 이미지 리스트 가져오기
-		
-		
-		// 3. 페이징	
-		// 3.1 주문 정보 리스트 숫자 구하기
-		
-		// 3.2 현재 페이지 구하기
-		
-		// 3.3 페이징 계산
+		// 3. 특정 페이지의 주문 정보 가져오기 
+		// 3.1 Order에서 주문자의 주문 정보가져오기
+		ArrayList<OrderStatus> orderList = spService.getMyOrderList(emailId, pi);
 		
 
 		// 4. mv에 담아 이동
-		
+		if(orderList.size()>0) {
+			mv.addObject("orderList", orderList);
+			mv.setViewName("orderList");
+		} else {
+			throw new BoardException("주문 내역 조회에 실패했습니다.");
+		}
+		return mv;
 	}
 	
-	// 주문 관리로 이동하기
-	@RequestMapping("orderAdminList.sp")
-	public String orderAdminList() {
-		// 1. 전체 주문(ORDER) 정보 가져오기
+	// 주문 내역 - 상세보기
+	@RequestMapping("orderDetail.sp")
+	public ModelAndView orderDetail(@RequestParam("orderNo") int orderNo, ModelAndView mv) {
+		// 1. 주문 상세 정보 가져오기
+		ArrayList<OrderDetail> orderDetailList = spService.getMyOrderDetailList(orderNo);
 		
-		// 2. 페이징
+		// 2. 주문 상세 이미지 가져오기
+		ArrayList<Image> orderImgList = spService.getMyOrderImgList(orderDetailList);
 		
-		// 3. mv에 담아 이동
+		// 3. 이동
+		if(orderDetailList !=null && orderImgList != null) {
+			mv.addObject("orderDetailList", orderDetailList);
+			mv.addObject("orderImgList", orderImgList);	
+			mv.setViewName("orderDetail");
+		} else {
+			throw new BoardException("주문 상세보기에 실패했습니다.");
+		}
+		return mv;
 	}
+	
+	// 주문 관리 페이지
+	@RequestMapping("orderAdminList.sp")
+	public ModelAndView orderAdminList(@RequestParam(value="page", required=false) Integer page, 
+			 HttpSession session, ModelAndView mv) {
+//		// 1. 관리자 여부 확인 -> 나중에 TP로 완성하기
+//		Admin admin = (Admin)session.getAttribute("admin");
+//		if(admin != null) {
+//		
+//		} else {
+//			throw new BoardException()
+//		}
+		
+		// 2. 페이징	
+		// 2.1 주문 정보 리스트 숫자 구하기
+		int listCount = spService.getOrderListCount();
+		
+		// 2.2 현재 페이지 구하기
+		int currentPage=1;
+		if(page != null) {
+			currentPage = page;
+		}
+		
+		// 2.3 한 페이지에 들어갈 게시물 수
+		int boardLimit = 10;
+		
+		// 2.4 페이징 계산		
+		PageInfo pi = new Pagination().getPageInfo(currentPage, listCount, boardLimit);
+		
+		// 3. 특정 페이지의 주문 정보 가져오기 
+		// 3.1 Order에서 주문자의 주문 정보가져오기
+		ArrayList<OrderStatus> orderAdminList = spService.getAdminOrderList(pi);
+		
+		// 4. mv에 담아 이동
+		if(orderAdminList.size()>0) {
+			mv.addObject("orderAdminList", orderAdminList);
+			mv.setViewName("orderAdminList");
+		} else {
+			throw new BoardException("주문 관리 조회에 실패했습니다.");
+		}
+		return mv;		
+	}
+	
+	// 주문 관리 - 주문 상태 변경
+	@RequestMapping("changeOrderStatus.sp")
+	public void changeOrderStatus(@ModelAttribute OrderStatus os, HttpServletResponse response) {
+		int result = spService.changeOrderStatus(os);
+		
+		
+		if(result<1) {
+			throw new BoardException("주문 상태 변경에 실패했습니다.");
+		}
+		
+		try {
+			new GsonBuilder().setDateFormat("yyyy-MM-dd").create().toJson(result, response.getWriter());
+		} catch (JsonIOException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	// 주문 관리 - 주문 목록
+	@RequestMapping("orderedList.sp")
+	public ModelAndView getOrderedList(@RequestParam(value="page", required=false) Integer page, 
+			 HttpSession session, ModelAndView mv) {
+//		// 1. 관리자 여부 확인 -> 나중에 TP로 완성하기
+		
+		// 2. 페이징	
+		// 2.1 주문 정보 리스트 숫자 구하기
+		int listCount = spService.getOrderedListCount();
+		
+		// 2.2 현재 페이지 구하기
+		int currentPage=1;
+		if(page != null) {
+			currentPage = page;
+		}
+		
+		// 2.3 한 페이지에 들어갈 게시물 수
+		int boardLimit = 10;
+		
+		// 2.4 페이징 계산		
+		PageInfo pi = new Pagination().getPageInfo(currentPage, listCount, boardLimit);		
+		
+		// 3. 주문(ordered) 목록 가져오기
+		ArrayList<OrderDetail> orderedList = spService.getOrderedList(pi);
+		System.out.println("ordered : " + orderedList);
+		
+		// 4. 이동
+		
+		mv.addObject("orderedList", orderedList);
+		mv.addObject("pi", pi);
+		mv.setViewName("orderedList");
+
+		return mv;
+	}
+	
+	
 	
 	
 	

@@ -65,6 +65,21 @@
 		<servlet-name>memberServlet</servlet-name>
 		<url-pattern>*.me</url-pattern>
 	</servlet-mapping>	
+	
+	<!-- 인코딩 -->
+	<filter>
+		<filter-name>encodingFilter</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>encodingFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	
 	<!-- 에러 경로 -->
 	<error-page>
 		<exception-type>java.lang.Exception</exception-type>

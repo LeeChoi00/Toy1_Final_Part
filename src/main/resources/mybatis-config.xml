@@ -11,8 +11,9 @@
 		<typeAlias type="toy.shopping.pay.shop.model.vo.Image" alias="Image"/>
 		<typeAlias type="toy.shopping.pay.shop.model.vo.Cart" alias="Cart"/>
 		<typeAlias type="toy.shopping.pay.member.model.vo.Member" alias="Member"/>
-		<typeAlias type="toy.shopping.pay.member.model.vo.OrderDetail" alias="OrderDetail"/>
-		<typeAlias type="toy.shopping.pay.member.model.vo.OrderStatus" alias="OrderStatus"/>
+		<typeAlias type="toy.shopping.pay.member.model.vo.Admin" alias="Admin"/>
+		<typeAlias type="toy.shopping.pay.shop.model.vo.OrderDetail" alias="OrderDetail"/>
+		<typeAlias type="toy.shopping.pay.shop.model.vo.OrderStatus" alias="OrderStatus"/>
 	</typeAliases>
 	
 	<mappers>

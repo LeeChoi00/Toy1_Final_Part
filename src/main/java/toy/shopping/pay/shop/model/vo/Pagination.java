@@ -1,9 +1,8 @@
 package toy.shopping.pay.shop.model.vo;
 
 public class Pagination {
-	public static PageInfo getPageInfo(int currentPage, int listCount) {
+	public static PageInfo getPageInfo(int currentPage, int listCount, int boardLimit) {
 		int pageLimit = 5;
-		int boardLimit = 15;
 		int maxPage;
 		int startPage;
 		int endPage;

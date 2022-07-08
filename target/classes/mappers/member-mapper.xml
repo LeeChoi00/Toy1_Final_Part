@@ -18,6 +18,18 @@
 		<result column="LOGIN_TYPE" property="loginType"/>
 	</resultMap>
 	
+	<resultMap type="Admin" id="adminResultMap">
+		<id column="ADMIN_ID" property="adminId"/>
+		
+		<result column="ADMIN_PWD" property="adminPwd"/>
+		<result column="ADMIN_NAME" property="adminName"/>
+	</resultMap>
+	
+	<select id="adminId" resultMap="adminResultMap">
+		select *
+		from admin
+	</select>
+	
 	<select id="login" resultMap="memberResultMap">
 		select *
 		from member

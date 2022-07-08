@@ -107,17 +107,63 @@ public class ShopServiceImpl implements ShopService{
 	}
 	
 	// 주문 내역
-	// 1. 사용자 주문 내역 가져오기
+	// 1. 페이징
 	@Override
-	public ArrayList<OrderDetail> myOrderList(String emailId) {
-		return spDAO.myOrderList(sqlSession, emailId);
+	public int getMyOrderListCount(String emailId) {
+		return spDAO.getMyOrderListCount(sqlSession, emailId);
+	}	
+
+	// 2. 사용자 주문 정보 가져오기
+	// 2.1 주문 내역 가져오기
+	@Override
+	public ArrayList<OrderStatus> getMyOrderList(String emailId, PageInfo pi) {
+		return spDAO.getMyOrderList(sqlSession, emailId, pi);
+	}
+
+
+	// 주문 내역 - 상세보기
+	// 1. 상세보기 리스트 가져오기
+	@Override
+	public ArrayList<OrderDetail> getMyOrderDetailList(int orderNo) {
+		return spDAO.getMyOrderDetailList(sqlSession, orderNo);
+	}
+
+	// 2. 상세보기 이미지 리스트 가져오기
+	@Override
+	public ArrayList<Image> getMyOrderImgList(ArrayList<OrderDetail> orderDetailList) {
+		return spDAO.getMyOrderImgList(sqlSession, orderDetailList);
 	}
 	
-	// 2. 주문 상태 내역 가져오기
+	// 주문 관리
 	@Override
-	public ArrayList<OrderStatus> myOrderStatusList(ArrayList<OrderDetail> orderList) {
-		return spDAO.myOrderStatusList(sqlSession, orderList);
+	public int getOrderListCount() {
+		return spDAO.getOrderListCount(sqlSession);
 	}
+
+	@Override
+	public ArrayList<OrderStatus> getAdminOrderList(PageInfo pi) {
+		return spDAO.getAdminOrderList(sqlSession, pi);
+	}
+	
+	// 주문 관리 - 주문 상태 변경
+	@Override
+	public int changeOrderStatus(OrderStatus os) {
+		return spDAO.changeOrderStatus(sqlSession, os);
+	}
+	
+	// 주문 관리 - 주문 목록
+	@Override
+	public int getOrderedListCount() {
+		return spDAO.getOrderedListCount(sqlSession);
+	}
+
+	@Override
+	public ArrayList<OrderDetail> getOrderedList(PageInfo pi) {
+		return spDAO.getOrderedList(sqlSession, pi);
+	}
+	
+	
+	
 	
 
 

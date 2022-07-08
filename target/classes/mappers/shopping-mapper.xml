@@ -57,14 +57,22 @@
 		<result column="PRODUCT_NO" property="productNo"/>
 	</resultMap>
 	
-	<!-- 4. OrderDetail -->
+	<!-- 4. OrderStatus -->
 	<resultMap type="OrderStatus" id="orderStatusResultMap">
-		<id column="ORDER_STATUS_NO" property="orderStatusNo"/>
+		<id column="ORDER_NO" property="orderNo"/>
 		
+		<result column="ORDER_DATE" property="orderDate"/>
+		<result column="TOTAL_PRICE" property="totalPrice"/>		
+		<result column="ORDER_REQUEST" property="orderRequest"/>
+		<result column="EMAIL_ID" property="emailId"/>
+		<result column="ORDER_STATUS_NO" property="orderStatusName"/>
+		<result column="RECIPIENT_NAME" property="recipientName"/>
+		<result column="RECIPIENT_ADR" property="recipientAdr"/>
+		<result column="RECIPIENT_PHONE" property="recipientPhone"/>
+		<result column="ORDER_STATUS_NO" property="orderStatusNo"/>		<!-- 얘 필요없음 나중에 db 튜닝 연습할 때 없애기 -->
 		<result column="ORDER_STATUS_NAME" property="orderStatusName"/>
-		<result column="ORDER_NO" property="orderNo"/>
 	</resultMap>	
-	
+
 		
 	<!-- sql -->
 	
@@ -178,22 +186,73 @@
 		values(seq_odid.nextval, #{orderAmount}, #{productNo}, seq_oid.currval)
 	</insert>
 	
-	<!-- 주문 내역 -->
-	<!-- 1. 주문 내역 받아오기 -->
-	<select id="myOrderList" resultMap="orderDetailResultMap">
+	<!-- 주문 내역 페이지 -->
+	<!-- 1. 페이징 -->
+	<select id="getMyOrderListCount" resultType="_int">
+		select count(*)
+		from "ORDER"
+		where email_id = #{emailId}
+	</select>
+	
+	<!-- 주문 정보 받아오기 -->
+	<!-- 2.1 주문 내역 받기 -->
+	<select id="myOrderList" resultMap="orderStatusResultMap">
+		select *
+		from "ORDER"
+			left join order_status using(order_no)
+		where email_id=#{emailId}
+	</select>
+
+	<!-- 주문 내역 - 상세보기 -->
+	<select id="myOrderDetailList" resultMap="orderDetailResultMap">
 		select *
 		from "ORDER"
 			left join order_detail using(order_no)
-		where email_id=#{emailId}
+		where order_no = #{orderNo}
 	</select>
 	
-	<!-- 1. 주문 상태 내역 받아오기 -->
-	<select id="myOrderStatusList" resultMap="orderStatusResultMap">
+	<!-- 2. 주문 상세보기 이미지 받기 -->
+	<select id="getMyOrderImgList" resultMap="imageResultMap">
 		select *
-		from order_status
-		where order_no=#{orderNo}
+		from image
+		where product_no=#{productNo} and file_level = 0
 	</select>
-
+	
+	<!-- 주문 관리 -->
+	<!-- 1. 페이징 -->
+	<select id="getOrderListCount" resultType="_int">
+		select count(*)
+		from "ORDER"
+	</select>
+	
+	<!-- 2. 주문 내역 받아오기 -->
+	<select id="getAdminOrderList" resultMap="orderStatusResultMap">
+		select *
+		from "ORDER"
+			left join order_status using(order_no)
+	</select>
+	
+	<!-- 주문 관리 - 주문 상태 변경 -->
+	<update id="changeOrderStatus">
+		update order_status
+		set order_status_name=#{orderStatusName}
+		where order_no = #{orderNo}
+	</update>
+	
+	<!-- 주문 관리 - 주문 목록 -->
+	<select id="getOrderedListCount" resultType="_int">
+		select count(*)
+		from "ORDER"
+			left join order_status using(order_no)
+		where order_status_name = '주문'
+	</select>
+	
+	<select id="getOrderedList" resultMap="orderStatusResultMap">
+		select *
+		from "ORDER"
+			left join order_status using(order_no)
+		where order_status_name = '주문'
+	</select>
 </mapper>
 
 

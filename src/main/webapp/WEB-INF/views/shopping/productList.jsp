@@ -111,7 +111,6 @@
 
 	</script>
 	
-	
 	<!-- 결제 페이지 이동 -->
 <!-- 	<script>
 		var productAmount = document.getElementById('productAmount').value

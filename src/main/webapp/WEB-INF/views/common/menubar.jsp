@@ -40,8 +40,8 @@
             <li><a href="<%= request.getContextPath() %>/cart.sp" >장바구니-> 결제</a></li>
             <li><a href="<%= request.getContextPath() %>/orderList.sp" >주문 내역(고객)</a></li>
             <li><a href="<%= request.getContextPath() %>/orderAdminList.sp" >주문 관리(관리자)</a></li>
-            <li><a href="<%= request.getContextPath() %>/login.sp" >로그인</a></li>
-            <li><a href="<%= request.getContextPath() %>/signUp.sp" >회원가입</a></li>
+            <li><a href="<%= request.getContextPath() %>/login.me" >로그인</a></li>
+            <li><a href="<%= request.getContextPath() %>/signUp.me" >회원가입</a></li>
         </ul>
 
     </div>
@@ -53,7 +53,7 @@
 <br>
 
 <div id="loginArea">
-	<c:if test="${empty sessionScope.loginUser }">
+	<c:if test="${empty sessionScope.loginUser && empty sessionScope.admin}">
 		<form action="login.me" method="post">
 			<table class="loginoutForm">
 				<tr>
@@ -76,7 +76,7 @@
 			</table>
 		</form>
 	</c:if>
-	<c:if test="${!empty sessionScope.loginUser }">
+	<c:if test="${!empty sessionScope.loginUser || !empty sessionScope.admin}">
 		<div class="loginoutForm" align="right">
 			<c:out value="${loginUser.userName }님 오늘도 맛있는 하루되세요"/>
 			<button onclick="location.href='logout.me'">로그아웃</button>	

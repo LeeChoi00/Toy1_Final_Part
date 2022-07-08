@@ -142,19 +142,76 @@ public class ShopDAO {
 	}
 	
 	// 주문 내역
-	// 1. 주문 리스트 받기
-	public ArrayList<OrderDetail> myOrderList(SqlSessionTemplate sqlSession, String emailId) {
-		return (ArrayList)sqlSession.selectList("shoppingMapper.myOrderList", emailId);
+	// 1. 페이징
+	public int getMyOrderListCount(SqlSessionTemplate sqlSession, String emailId) {
+		return sqlSession.selectOne("shoppingMapper.getMyOrderListCount", emailId);
+	}
+	
+	// 2. 주문 정보 받기
+	// 2.1 주문 리스트 받기
+	public ArrayList<OrderStatus> getMyOrderList(SqlSessionTemplate sqlSession, String emailId, PageInfo pi) {
+		// 1. 건너뛸 페이지 수
+		int offset = (pi.getCurrentPage()-1)*pi.getBoardLimit();
+		
+		// 2. Rowbounds
+		RowBounds rowBounds = new RowBounds(offset, pi.getBoardLimit());	
+		return (ArrayList)sqlSession.selectList("shoppingMapper.myOrderList", emailId, rowBounds);
 	}
 
-	public ArrayList<OrderStatus> myOrderStatusList(SqlSessionTemplate sqlSession, ArrayList<OrderDetail> orderList) {
-		ArrayList<OrderStatus> orderStatusList = new ArrayList<OrderStatus>();
-		for(int i=0; i<orderList.size();i++) {
-			OrderStatus os = sqlSession.selectOne("shoppingMapper.myOrderStatusList", orderList.get(i));
-			orderStatusList.add(os);
+
+	// 주문 내역 - 상세보기
+	// 1. 상세보기 리스트 가져오기
+	public ArrayList<OrderDetail> getMyOrderDetailList(SqlSessionTemplate sqlSession, int orderNo) {
+		return (ArrayList)sqlSession.selectList("shoppingMapper.myOrderDetailList", orderNo);
+	} 
+	
+	// 2 주문 상세보기 이미지 리스트 받기
+	public ArrayList<Image> getMyOrderImgList(SqlSessionTemplate sqlSession, ArrayList<OrderDetail> orderDetailList) {
+		ArrayList<Image> orderImgList = new ArrayList<Image>();
+		for(int i = 0; i<orderDetailList.size();i++) {
+			Image img = sqlSession.selectOne("shoppingMapper.getMyOrderImgList", orderDetailList.get(i).getProductNo());
+			orderImgList.add(img);
 		}
-		return orderStatusList;
+		return orderImgList;
 	}
+	
+	// 주문 관리
+	// 1. 페이징
+	public int getOrderListCount(SqlSessionTemplate sqlSession) {
+		return sqlSession.selectOne("shoppingMapper.getOrderListCount");
+	}
+	
+	// 2. 주문 내역 가져오기
+	public ArrayList<OrderStatus> getAdminOrderList(SqlSessionTemplate sqlSession, PageInfo pi) {
+		// 1. 건너뛸 페이지 수
+		int offset = (pi.getCurrentPage()-1)*pi.getBoardLimit();
+		
+		// 2. Rowbounds
+		RowBounds rowBounds = new RowBounds(offset, pi.getBoardLimit());	
+		return (ArrayList)sqlSession.selectList("shoppingMapper.getAdminOrderList", null, rowBounds);
+	}
+	
+	// 주문 관리 - 주문 상태 변경
+	public int changeOrderStatus(SqlSessionTemplate sqlSession, OrderStatus os) {
+		return sqlSession.update("shoppingMapper.changeOrderStatus", os);
+	}
+	
+	// 주문 관리 - 주문 목록
+	public int getOrderedListCount(SqlSessionTemplate sqlSession) {
+		return sqlSession.selectOne("shoppingMapper.getOrderedListCount");
+	}
+
+	public ArrayList<OrderDetail> getOrderedList(SqlSessionTemplate sqlSession, PageInfo pi) {
+		// 1. 건너뛸 페이지 수
+		int offset = (pi.getCurrentPage()-1)*pi.getBoardLimit();
+		
+		// 2. Rowbounds
+		RowBounds rowBounds = new RowBounds(offset, pi.getBoardLimit());	
+		return (ArrayList)sqlSession.selectList("shoppingMapper.getOrderedList", null, rowBounds);
+	}
+
+
+	
 
 
 
